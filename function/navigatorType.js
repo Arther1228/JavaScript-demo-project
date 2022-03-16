@@ -1,3 +1,8 @@
+/**
+ * 另外一个版本
+ * https://www.cnblogs.com/vajoy/p/3736576.html
+ */
+
 //简单的判断浏览器的类型
 function navigatorType() {
     var userAgent = navigator.userAgent,
@@ -66,6 +71,6 @@ function navigatorType() {
         version = browserMatch.version;
     }
 //	document.write(browser+version);
-	alert("browser:"+ browser);
+    alert("browser:" + browser);
 //     return browser;
 }
