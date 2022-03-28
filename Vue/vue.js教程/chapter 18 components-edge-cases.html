@@ -8,10 +8,29 @@
 
 <body>
 
-	
+	<div id="app">
+
+	</div>
+
 	<script>
 
-		
+		// Vue 根实例
+		var vm1 = new Vue({
+			el: "#app",
+			data: {
+				foo: 1
+			},
+			computed: {
+				bar: function () {
+					return this.foo + 1;
+				}
+			},
+			methods: {
+				baz: function () {
+					console.log("foo: " + this.foo);
+				}
+			}
+		})
 
 	</script>
 </body>
