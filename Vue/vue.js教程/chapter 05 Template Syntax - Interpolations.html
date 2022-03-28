@@ -1,37 +1,157 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-<meta charset="utf-8">
-<title></title>
-<script src="vue.js" type="text/javascript" charset="utf-8"></script>
+	<meta charset="utf-8">
+	<title></title>
+	<script src="vue.js" type="text/javascript" charset="utf-8"></script>
+	<!-- 因为 AJAX 库和通用工具的生态已经相当丰富，Vue 核心代码没有重复 -->
+	<!-- 提供这些功能以保持精简。这也可以让你自由选择自己更熟悉的工具。 -->
+	<script src="https://cdn.jsdelivr.net/npm/axios@0.12.0/dist/axios.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/lodash@4.13.1/lodash.min.js"></script>
 </head>
+
 <body>
-<div id="app">
-	{{msg}}
-	<p>Using mustaches: {{ rawHtml }}</p>
-	<p v-html="rawHtml"></p>
-	<div v-bind:class="color">test...</div>
-	<p>{{ number + 1 }}</p>
-	<p>{{ 1 == 1 ? 'YES' : 'NO' }}</p>
-	<p>{{ message.split('').reverse().join('') }}</p>
-</div>
-<script type="text/javascript">
-var vm = new Vue({
-	el : "#app",
-	data : {
-		msg : "hi vue",
-		rawHtml : '<span style="color:red">this is should be red</span>',
-		color:'blue',
-		number : 10,
-		ok : 1,
-		message : "vue"
-	}
-});
-vm.msg = "hi....";
-</script>
-<style type="text/css">
-.red{color:red;}
-.blue{color:blue; font-size:100px;}
-</style>
+
+	<div id="app">
+
+		{{msg}}
+		<!-- v-once 会丢掉 实例vm.msg的赋值操作-->
+		<span v-once>这个将不会改变: {{ msg }}</span>
+
+		<p>Using mustaches: {{ rawHtml }}</p>
+		<p v-html="rawHtml"></p>
+
+		<div v-bind:class="color">test...</div>
+
+		<p>{{ number + 1 }}</p>
+
+		<p>{{ 1 == 1 ? 'YES' : 'NO' }}</p>
+
+		<p>{{ message.split('').reverse().join('') }}</p>
+
+		<!--动态参数-->
+		<a v-on:[eventname]="doSomething"> ..1.. </a>
+
+		<!-- <a v-bind:['foo' + bar]="value"> ... </a>  -->
+
+
+		<!--修饰符-->
+		<div>
+			<form v-on:submit.prevent="onSubmit">..2..</form>
+		</div>
+
+		<a href="https://www.w3schools.com">Visit W3Schools</a>
+
+		<!-- 缩写 -->
+		<div>
+			<a :href="url">..w3schools.</a>
+		</div>
+
+		<!-- 缩写 -->
+		<a @click="doSomething">...</a>
+
+		<div id="demo">{{ fullName }}</div>
+
+	</div>
+
+
+	<div id="watch-example">
+		<p>
+			Ask a yes/no question:
+			<input v-model="question">
+		</p>
+		<p>{{ answer }}</p>
+	</div>
+
+	<script type="text/javascript">
+
+		var vm = new Vue({
+			el: "#app",
+			data: {
+				msg: "hi vue",
+				rawHtml: '<span style="color:red">this is should be red</span>',
+				color: 'blue',
+				number: 10,
+				ok: 1,
+				message: "vue",
+				eventname: "click",     //动态参数
+				url: "https://www.w3schools.com",
+				firstName: 'Foo',
+				lastName: 'Bar'
+			},
+			methods: {
+				doSomething: function () {
+					console.log('doSomething');
+				},
+				onSubmit: function () {
+					alert("submit");
+				}
+			},
+			computed: {
+				fullName: function () {
+					return this.firstName + ' ' + this.lastName
+				}
+			}
+		});
+
+		vm.msg = "hi....";
+
+
+		var watchExampleVM = new Vue({
+			el: '#watch-example',
+			data: {
+				question: '',
+				answer: 'I cannot give you an answer until you ask a question!'
+			},
+			watch: {
+				// 如果 `question` 发生改变，这个函数就会运行
+				question: function (newQuestion, oldQuestion) {
+					this.answer = 'Waiting for you to stop typing...'
+					this.debouncedGetAnswer()
+				}
+			},
+			created: function () {
+				// `_.debounce` 是一个通过 Lodash 限制操作频率的函数。
+				// 在这个例子中，我们希望限制访问 yesno.wtf/api 的频率
+				// AJAX 请求直到用户输入完毕才会发出。想要了解更多关于
+				// `_.debounce` 函数 (及其近亲 `_.throttle`) 的知识，
+				// 请参考：https://lodash.com/docs#debounce
+				this.debouncedGetAnswer = _.debounce(this.getAnswer, 500)
+			},
+			methods: {
+				getAnswer: function () {
+					if (this.question.indexOf('?') === -1) {
+						this.answer = 'Questions usually contain a question mark. ;-)'
+						return
+					}
+					this.answer = 'Thinking...'
+					var vm = this
+					axios.get('https://yesno.wtf/api')
+						.then(function (response) {
+							vm.answer = _.capitalize(response.data.answer)
+						})
+						.catch(function (error) {
+							vm.answer = 'Error! Could not reach the API. ' + error
+						})
+				}
+			}
+		})
+
+
+	</script>
+
+
+	<style type="text/css">
+		.red {
+			color: red;
+		}
+
+		.blue {
+			color: blue;
+			font-size: 100px;
+		}
+	</style>
 </body>
+
 </html>

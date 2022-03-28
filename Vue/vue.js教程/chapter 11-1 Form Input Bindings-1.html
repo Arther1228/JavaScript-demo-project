@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<title></title>
+	<script src="vue.js" type="text/javascript" charset="utf-8"></script>
+</head>
+
+<body>
+
+	<div id="example-6">
+		<select v-model="selected" multiple style="width: 50px;">
+			<option>A</option>
+			<option>B</option>
+			<option>C</option>
+		</select>
+		<br>
+		<span>Selected: {{ selected }}</span>
+	</div>
+
+
+	<div id="example-7">
+		<select v-model="selected">
+			<option v-for="option in options" v-bind:value="option.value">
+				{{ option.text }}
+			</option>
+		</select>
+		<span>Selected: {{ selected }}</span>
+	</div>
+
+	
+	<div id="example-8">
+		<input
+		type="checkbox"
+		v-model="toggle"
+		true-value="yes"
+		false-value="no"
+	  >
+
+	  <span>toggle value: {{ toggle }}</span>
+	</div>
+
+
+	<script type="text/javascript">
+
+		var vm6 = new Vue({
+			el: '#example-6',
+			data: {
+				selected: []
+			}
+		})
+
+		var vm7 = new Vue({
+			el: '#example-7',
+			data: {
+				selected: 'A',
+				options: [
+					{ text: 'One', value: 'A' },
+					{ text: 'Two', value: 'B' },
+					{ text: 'Three', value: 'C' }
+				]
+			}
+		})
+
+		var vm8 = new Vue({
+			el: '#example-8',
+			data: {
+				toggle: ''
+			}
+		})
+
+	</script>
+	<style type="text/css">
+
+	</style>
+</body>
+
+</html>

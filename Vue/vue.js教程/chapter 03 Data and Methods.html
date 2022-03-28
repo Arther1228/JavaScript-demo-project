@@ -1,34 +1,39 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-<meta charset="utf-8">
-<title></title>
-<script src="vue.js" type="text/javascript" charset="utf-8"></script>
+	<meta charset="utf-8">
+	<title></title>
+	<script src="vue.js" type="text/javascript" charset="utf-8"></script>
 </head>
+
 <body>
-<div id="app">
-	{{a}}
-</div>
+	<div id="app">
+		{{a}}
+	</div>
 
-<script type="text/javascript">
-var data = { a : 1 };
-var vm = new Vue({
-	el   : "#app",
-	data : data
-});
+	<script type="text/javascript">
 
-vm.a = 2;
+		var data = { a: 1 };
+		var vm = new Vue({
+			el: "#app",
+			data: data
+		});
 
-vm.$watch('a', function(newVal, oldVal){
-	console.log(newVal, oldVal);
-})
+		//备注：注意这里的vm是一个实例
+		vm.a = 2;
 
-vm.$data.a = 4;
+		vm.$watch('a', function (newVal, oldVal) {
+			console.log(newVal, oldVal);
+		})
 
-//vm.$data.a = "test...."
+		vm.$data.a = 4;
+
+		// vm.$data.a = "test...."
 
 
-</script>
+	</script>
 
 </body>
+
 </html>
