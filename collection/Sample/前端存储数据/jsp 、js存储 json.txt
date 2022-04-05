@@ -1,0 +1,5 @@
+html  存储 json
+
+
+将JSON对象存储在HTML jQuery中的数据属性中
+https://codeday.me/bug/20170701/32349.html
