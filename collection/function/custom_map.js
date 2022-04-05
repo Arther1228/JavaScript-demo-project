@@ -53,3 +53,11 @@ function Map() {
     this.size = size;
     this.isEmpty = isEmpty;
 }
+
+/**test */
+var one_map = new Map();
+one_map.put("1", 1);
+one_map.put(2, 2);
+one_map.put(1, "1");
+console.log("one_map: " + one_map);
+console.log("get key's value, 1:" + one_map.get(1));

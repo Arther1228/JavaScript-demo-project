@@ -50,3 +50,7 @@ function fun4() {
         console.log("i am NaN");
     }
 }
+
+
+/**test */
+fun4();

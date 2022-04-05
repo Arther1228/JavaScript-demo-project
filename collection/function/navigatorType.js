@@ -74,3 +74,9 @@ function navigatorType() {
     alert("browser:" + browser);
 //     return browser;
 }
+
+
+
+/**test */
+
+navigatorType();

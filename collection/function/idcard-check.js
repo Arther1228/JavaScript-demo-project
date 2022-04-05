@@ -113,3 +113,13 @@ var checkID = function (val) {
     }
     return false;
 }
+
+
+
+/**test */
+
+var idNo = "340222"
+
+if (!checkID(idNo)) {
+    console.log('身份证号码格式不正确!');
+}
