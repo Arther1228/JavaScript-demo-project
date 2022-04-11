@@ -1,0 +1,56 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+ <head>
+  <title> New Document </title>
+  <meta name="Generator" content="EditPlus">
+  <meta name="Author" content="">
+  <meta name="Keywords" content="">
+  <meta name="Description" content="">
+  <script type="text/javascript" src="com.js"></script>
+ </head>
+
+ <body>
+  
+ </body>
+
+ <script type="text/javascript">
+	var will = new Person("Will", 28);
+	//1.----- 查看对象will的原型
+	
+	console.log("will: " + will);	
+	console.log("will.__proto__: " + will.__proto__);
+	console.log("will.constructor: " + will.constructor);
+	
+
+	//2.-----查看对象will的原型（will.__proto__）的原型
+	/*
+	console.log(will.__proto__ === Person.prototype);
+	console.log(Person.prototype.__proto__);
+	console.log(Person.prototype.constructor);
+	console.log(Person.prototype.constructor === Person);
+	
+
+	//3.-----查看对象Object的原型	
+	/*
+	console.log(Person.prototype.__proto__ === Object.prototype);
+	console.log(typeof Object);
+	console.log(Object);
+	console.log(Object.prototype);
+	console.log(Object.prototype.__proto__);
+	console.log(Object.prototype.constructor);
+	*/
+	
+	//4.-----查看对象Function的原型	
+	/*
+	console.log(Person.__proto__ === Function.prototype);
+	console.log(Person.constructor === Function)
+	console.log(typeof Function);
+	console.log(Function);
+	console.log(Function.prototype);
+	console.log(Function.prototype.__proto__);
+	console.log(Function.prototype.constructor);
+	*/
+
+	
+</script>
+</html>

@@ -1,0 +1,46 @@
+<html> 
+ <head> 
+  <script>
+ 
+   function AddListeners (){
+     var elemToCheck = document.getElementById("myDiv");
+       if(elemToCheck.addEventListener){ // Firefox, Opera and Safari
+           elemToCheck.addEventListener('DOMAttrModified', OnAttrModified, false);
+       } else if(elemToCheck.attachEvent){  // Internet Explorer
+           elemToCheck.attachEvent('onpropertychange', OnAttrModified);
+       }  
+   }  
+      
+   function OnAttrModified (event) {  
+      var txt = "";  
+      if (event.attrChange) {  
+         // Firefox, Safari, Opera  
+         txt += "The element: " + event.target;  
+         txt += "\nproperty: " + event.attrName;  
+         txt += "\noriginal value: " + event.prevValue;  
+         txt += "\n changed to: " + event.newValue;  
+       } else {  
+          // Internet Explorer  
+          txt += "The element: " + event.srcElement.tagName;  
+          txt += "\nproperty: " + event.propertyName;  
+     
+          var elem = event.srcElement;  
+          txt += "\nchanged value: " + elem.attributes[event.propertyName].value;  
+       }  
+          alert (txt);  
+    }  
+      
+    function ChangeDDD () {  
+       var div = document.getElementById ("myDiv");
+       var nv=Math.random()+"";
+       div.setAttribute("ddd",nv);
+    }  
+  </script> 
+ </head> 
+<body onload="AddListeners();"> 
+  <button onclick="ChangeDDD();">Change ddd Attribute!</button> 
+  <div id="myDiv" ddd="Old Attribute"> 
+    divdivdivdivdivdivdivdiv 
+  </div> 
+</body> 
+</html> 
