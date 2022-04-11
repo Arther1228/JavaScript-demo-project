@@ -1,0 +1,39 @@
+
+<html>
+
+<head>
+    <title>test ES6 module</title>
+</head>
+
+<body>
+</body>
+
+</html>
+<script type="module">
+    import uu from './utils.js'
+    //相当于 import { default as uu } from './utils.js'
+
+    console.info(uu.host)     // 1  output: localhost
+
+    import './utils.js'
+
+    import { fn1, fn2 } from './utils.js'  // {} 中是对象解析的写法
+    fn1()      // 2   output: function foo
+    fn2()      // 3   output: function fn2
+
+    // console.info(api);  //4   output: /apis
+
+    // // 可以写完整路径
+    // import { schema, endPoint as api } from 'http://localhost:5500/ES6/demo/utils.js'
+
+    // import * as util from './utils.js' // 引入所有并命别名为 util
+    // console.info(util.schema)   // 5    output: https
+    // console.info(util.PI)       // 6    output: 3.14
+
+    // // import 函数，动态引入, ES2020 加入的支持，Chrome 已支持
+    // import('./utils.js')           // 得到一个 Promise
+    //     .then(({ schema, Circle }) => {
+    //         const c = new Circle(2)
+    //         console.info(`circle area: ${c.area}`)  // 7   output: 12.56
+    //     })
+</script>
