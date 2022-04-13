@@ -9,7 +9,7 @@
 
 <body>
 	<div id="app">
-		{{ message }} {{name}}
+		{{ object.message }} {{object.name}}
 	</div>
 
 	<div id="app-2">
@@ -57,8 +57,10 @@
 		var app = new Vue({
 			el: '#app',
 			data: {
-				message: 'Hello Vue!',
-				name: "Vue"
+				object:{
+					message: 'Hello Vue!',
+					name: "Vue"
+				}
 			}
 		});
 
