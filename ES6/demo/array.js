@@ -23,5 +23,28 @@ const txData = {
     }
 };
 
-let dataArray = Array.of(lxData, zdData, ycData, txData);
-console.log(dataArray);
+let arr = Array.of(lxData, zdData, ycData, txData);
+console.log(arr);
+
+
+
+/**
+ * JavaScript 的 4 种数组遍历方法： for VS forEach() VS for/in VS for/of
+ * https://blog.fundebug.com/2019/03/11/4-ways-to-loop-array-inj-javascript/
+ */
+
+
+ for (let i = 0; i < arr.length; ++i) {
+    console.log(arr[i]);
+}
+
+for (let i in arr) {
+    console.log(arr[i]);
+}
+
+for (const v of arr) {
+    console.log(v);
+}
+
+
+arr.forEach((v, i) => console.log(v));
