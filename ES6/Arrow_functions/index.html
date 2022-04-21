@@ -1,0 +1,42 @@
+<html>
+
+<head>
+    <input id="demo">test ES6 module</input>
+    <button id="btn">test ES6 module</button>
+</head>
+
+<body>
+</body>
+
+</html>
+<script>
+
+    //https://www.w3school.com.cn/js/js_arrow_function.asp
+
+    
+    // 常规函数：
+    hello1 = function () {
+        document.getElementById("demo").innerHTML += this;
+    }
+
+    // window 对象调用该函数：
+    window.addEventListener("load", hello1);
+
+    // button 对象调用该函数：
+    document.getElementById("btn").addEventListener("click", hello1);
+
+
+
+    // 箭头函数：
+    hello2 = () => {
+        document.getElementById("demo").innerHTML += this;
+    }
+
+    // window 对象调用该函数：
+    window.addEventListener("load", hello2);
+
+    // button 对象调用该函数：
+    document.getElementById("btn").addEventListener("click", hello2);
+
+
+</script>
