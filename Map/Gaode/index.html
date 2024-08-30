@@ -46,6 +46,14 @@
     <button id="render-polygon-btn" class="layui-btn" style="margin-top: 10px;">渲染面</button>
   </div>
   
+  <div style="position: absolute; bottom: 60px; right: 10px; z-index: 1000;">
+    <!-- 其他输入框和按钮保留 -->
+    
+    <!-- 新增输入框和按钮用于渲染北斗网格 -->
+    <textarea id="beidou-grid-input" class="layui-textarea" style="width: 300px; height: 300px; margin-top: 20px;" placeholder="渲染北斗网格，输入格式如：[ {...}, {...} ]"></textarea>
+    <button id="render-beidou-grid-btn" class="layui-btn" style="margin-top: 10px;">渲染北斗网格</button>
+</div>
+
 
   <script type="text/javascript" src="https://webapi.amap.com/maps?v=1.4.15&key=40b562d9fcf89d0f9ea25dae05aae475&plugin=AMap.RangingTool"></script>
   <script>
@@ -159,6 +167,40 @@
           layer.msg('渲染点已完成', {time: 2000});
         }
 
+        // 新增方法：渲染北斗网格
+    function renderBeidouGrid() {
+      let input = document.getElementById('beidou-grid-input').value;
+      let gridData;
+      try {
+        gridData = JSON.parse(input);
+      } catch (e) {
+        layer.msg('网格数据格式不正确', {time: 2000});
+        return;
+      }
+
+      gridData.forEach(grid => {
+        let coords = [
+          [parseFloat(grid.topLeft.lng), parseFloat(grid.topLeft.lat)],
+          [parseFloat(grid.topRight.lng), parseFloat(grid.topRight.lat)],
+          [parseFloat(grid.bottomRight.lng), parseFloat(grid.bottomRight.lat)],
+          [parseFloat(grid.bottomLeft.lng), parseFloat(grid.bottomLeft.lat)]
+        ];
+        
+        let polygon = new AMap.Polygon({
+          map: map,
+          path: coords, // 网格路径
+          strokeColor: '#FF33FF', // 线条颜色
+          strokeOpacity: 1,       // 线条透明度
+          strokeWeight: 3,        // 线条宽度
+          fillColor: '#17B4FE',   // 填充颜色
+          fillOpacity: 0.35       // 填充透明度
+        });
+      });
+
+      layer.msg('北斗网格渲染已完成', {time: 2000});
+    }
+
+        document.getElementById('render-beidou-grid-btn').addEventListener('click', renderBeidouGrid);
         document.getElementById('pick-coordinates-btn').addEventListener('click', enableCoordinatePicker);
         document.getElementById('copy-coordinates-btn').addEventListener('click', copyCoordinates);
         document.getElementById('measure-distance-btn').addEventListener('click', enableRangingTool);
