@@ -45,14 +45,23 @@
     <textarea id="polygon-coordinates-input" class="layui-textarea" style="width: 300px; height: 300px;" placeholder="渲染面，在此输入坐标数组，格式如：[ [lng,lat],[lng,lat]... ]"></textarea>
     <button id="render-polygon-btn" class="layui-btn" style="margin-top: 10px;">渲染面</button>
   </div>
+
+
   
   <div style="position: absolute; bottom: 60px; right: 10px; z-index: 1000;">
     <!-- 其他输入框和按钮保留 -->
     
+      <!-- 新增输入框和按钮用于划线 -->
+    <textarea id="line-coordinates-input" class="layui-textarea" style="width: 300px; height: 100px; margin-top: 20px;" placeholder="划线，输入坐标格式如：[ {\"lng\": \"117.289694\", \"lat\": \"31.89193\"}, {\"lng\": \"117.304779\", \"lat\": \"31.889762\"} ]"></textarea>
+    <button id="render-line-btn" class="layui-btn" style="margin-top: 10px;">划线</button>
+
     <!-- 新增输入框和按钮用于渲染北斗网格 -->
     <textarea id="beidou-grid-input" class="layui-textarea" style="width: 300px; height: 300px; margin-top: 20px;" placeholder="渲染北斗网格，输入格式如：[ {...}, {...} ]"></textarea>
     <button id="render-beidou-grid-btn" class="layui-btn" style="margin-top: 10px;">渲染北斗网格</button>
 </div>
+
+
+
 
 
   <script type="text/javascript" src="https://webapi.amap.com/maps?v=1.4.15&key=40b562d9fcf89d0f9ea25dae05aae475&plugin=AMap.RangingTool"></script>
@@ -200,6 +209,31 @@
       layer.msg('北斗网格渲染已完成', {time: 2000});
     }
 
+    // 新增方法：渲染线条
+function renderLine() {
+  let input = document.getElementById('line-coordinates-input').value;
+  let lineData;
+  try {
+    lineData = JSON.parse(input);
+  } catch (e) {
+    layer.msg('线条数据格式不正确', {time: 2000});
+    return;
+  }
+
+  let coords = lineData.map(point => [parseFloat(point.lng), parseFloat(point.lat)]);
+
+  let polyline = new AMap.Polyline({
+    map: map,
+    path: coords, // 线条路径
+    strokeColor: "#00008B", // 线条颜色
+    strokeOpacity: 1,       // 线条透明度
+    strokeWeight: 5,        // 线条宽度
+  });
+
+  layer.msg('线条渲染已完成', {time: 2000});
+}
+
+        document.getElementById('render-line-btn').addEventListener('click', renderLine);
         document.getElementById('render-beidou-grid-btn').addEventListener('click', renderBeidouGrid);
         document.getElementById('pick-coordinates-btn').addEventListener('click', enableCoordinatePicker);
         document.getElementById('copy-coordinates-btn').addEventListener('click', copyCoordinates);
