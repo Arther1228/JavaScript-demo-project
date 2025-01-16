@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>逐年渲染动画</title>
+    	<script src="chart.js"></script>
+    <style>
+        /* 将图表容器居中并设置大小 */
+        .chart-container {
+            width: 600px; /* 缩小宽度 */
+            height: 300px; /* 缩小高度 */
+            margin: 50px auto; /* 居中 */
+            border: 1px solid #ccc; /* 可选：添加边框 */
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* 可选：添加阴影 */
+        }
+    </style>
+</head>
+<body>
+    <!-- 图表容器 -->
+    <div class="chart-container">
+        <canvas id="workChart"></canvas>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
