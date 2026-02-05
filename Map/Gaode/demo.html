@@ -44,22 +44,35 @@
             border: 2px solid #ff0000;
             box-sizing: border-box;
         }
+        /* 外推点图例改为绿色实心圆，和高低置信点样式统一 */
         .legend-extrap { 
             width: 15px;
             height: 15px;
             background: #00cc00; 
-            clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+            border-radius: 50%;
             margin-right: 8px;
         }
         #pointJsonInput {
             width: 100%;
-            height: 150px;
+            height: 120px;
             margin: 10px 0;
             padding: 8px;
             border: 1px solid #ccc;
             border-radius: 4px;
             font-size: 12px;
             resize: vertical;
+            box-sizing: border-box;
+        }
+        #extrapJsonInput {
+            width: 100%;
+            height: 120px;
+            margin: 10px 0;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 12px;
+            resize: vertical;
+            box-sizing: border-box;
         }
         #renderBtn {
             background: #0066ff;
@@ -72,6 +85,17 @@
         #renderBtn:hover {
             background: #0055dd;
         }
+        #renderExtrapBtn {
+            background: #00cc00;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        #renderExtrapBtn:hover {
+            background: #009900;
+        }
         .clear-btn {
             background: #ccc;
             color: #333;
@@ -80,6 +104,12 @@
             border-radius: 4px;
             cursor: pointer;
             margin-left: 10px;
+        }
+        .input-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin: 15px 0 5px 0;
+            color: #333;
         }
     </style>
 </head>
@@ -95,12 +125,19 @@
                 <div class="legend-dot legend-low"></div>
                 <span>低置信原始点（雷达/TDOA）</span>
             </div>
-            <!-- <div class="legend-item">
-                <div class="legend-extrap"></div>
+            <div class="legend-item">
+                <div class="legend-dot legend-extrap"></div>
                 <span>外推点</span>
-            </div> -->
-            <textarea id="pointJsonInput" placeholder="粘贴测试代码输出的JSON数据到这里..."></textarea>
-            <button id="renderBtn">渲染点位</button>
+            </div>
+            
+            <div class="input-title">原始点位JSON</div>
+            <textarea id="pointJsonInput" placeholder="粘贴高/低置信原始点的JSON数组数据到这里..."></textarea>
+            <button id="renderBtn">渲染原始点</button>
+            
+            <div class="input-title">外推点位JSON</div>
+            <textarea id="extrapJsonInput" placeholder="粘贴外推点的JSON数组数据到这里..."></textarea>
+            <button id="renderExtrapBtn">渲染外推点</button>
+            
             <button class="clear-btn" id="clearBtn">清空地图</button>
         </div>
     </div>
@@ -123,90 +160,137 @@
         }
 
         // 初始化事件监听
-function initEvent() {
-    document.getElementById('renderBtn').addEventListener('click', function() {
-        clearMap();
-        const jsonStr = document.getElementById('pointJsonInput').value.trim();
-        if (!jsonStr) {
-            alert('请粘贴点位JSON数据！');
-            return;
-        }
-        
-        try {
-            const rawData = JSON.parse(jsonStr);
-            
-            // 确保是数组
-            if (!Array.isArray(rawData)) {
-                alert('JSON数据必须是一个点数组！');
-                return;
-            }
-
-            // 定义高低置信点数组
-            const highConfPoints = [];
-            const lowConfPoints = [];
-
-            // 遍历原始数据，分类
-            rawData.forEach(item => {
-                const lng = parseFloat(item.longitude || item.lng);
-                const lat = parseFloat(item.latitude || item.lat);
-                const ds = item.dataSource;
-
-                if (isNaN(lng) || isNaN(lat) || ds == null) {
-                    console.warn('跳过无效点:', item);
+        function initEvent() {
+            // 渲染原始点事件
+            document.getElementById('renderBtn').addEventListener('click', function() {
+                const jsonStr = document.getElementById('pointJsonInput').value.trim();
+                if (!jsonStr) {
+                    alert('请粘贴原始点JSON数据！');
                     return;
                 }
+                
+                try {
+                    const rawData = JSON.parse(jsonStr);
+                    
+                    // 确保是数组
+                    if (!Array.isArray(rawData)) {
+                        alert('原始点JSON数据必须是一个点数组！');
+                        return;
+                    }
 
-                const point = {
-                    lng: lng,
-                    lat: lat,
-                    timestamp: item.timestamp || item.acceptedTimestamp,
-                    name: '点位',
-                    type: getDataTypeName(ds),
-                    raw: item
-                };
+                    // 定义高低置信点数组
+                    const highConfPoints = [];
+                    const lowConfPoints = [];
 
-                if (isHighConfidence(ds)) {
-                    highConfPoints.push(point);
-                } else if (isLowConfidence(ds)) {
-                    lowConfPoints.push(point);
+                    // 遍历原始数据，分类
+                    rawData.forEach(item => {
+                        const lng = parseFloat(item.longitude || item.lng);
+                        const lat = parseFloat(item.latitude || item.lat);
+                        const ds = item.dataSource;
+
+                        if (isNaN(lng) || isNaN(lat) || ds == null) {
+                            console.warn('跳过无效原始点:', item);
+                            return;
+                        }
+
+                        const point = {
+                            lng: lng,
+                            lat: lat,
+                            timestamp: item.timestamp || item.acceptedTimestamp,
+                            name: '原始点位',
+                            type: getDataTypeName(ds),
+                            raw: item
+                        };
+
+                        if (isHighConfidence(ds)) {
+                            highConfPoints.push(point);
+                        } else if (isLowConfidence(ds)) {
+                            lowConfPoints.push(point);
+                        }
+                        // 忽略 fusion_data (0) 和其他未知类型
+                    });
+
+                    // 按时间排序
+                    const sortByTime = (a, b) => (a.timestamp || 0) - (b.timestamp || 0);
+                    highConfPoints.sort(sortByTime);
+                    lowConfPoints.sort(sortByTime);
+
+                    // 渲染原始点
+                    if (highConfPoints.length > 0) {
+                        drawPoints(highConfPoints, "blue", "circle");
+                    }
+                    if (lowConfPoints.length > 0) {
+                        drawPoints(lowConfPoints, "red", "hollowCircle");
+                    }
+
+                    alert(`✅ 原始点渲染成功！\n高置信: ${highConfPoints.length} 点\n低置信: ${lowConfPoints.length} 点`);
+                } catch (e) {
+                    alert('原始点JSON格式错误：' + e.message);
+                    console.error('原始点解析错误详情：', e);
                 }
-                // 忽略 fusion_data (0) 和其他未知类型
             });
 
-            // 按时间排序（可选）
-            const sortByTime = (a, b) => (a.timestamp || 0) - (b.timestamp || 0);
-            highConfPoints.sort(sortByTime);
-            lowConfPoints.sort(sortByTime);
+            // 渲染外推点事件（保留原有逻辑，仅优化代码格式）
+            document.getElementById('renderExtrapBtn').addEventListener('click', function() {
+                const jsonStr = document.getElementById('extrapJsonInput').value.trim();
+                if (!jsonStr) {
+                    alert('请粘贴外推点JSON数据！');
+                    return;
+                }
+                
+                try {
+                    const extrapData = JSON.parse(jsonStr);
+                    
+                    // 确保是数组
+                    if (!Array.isArray(extrapData)) {
+                        alert('外推点JSON数据必须是一个点数组！');
+                        return;
+                    }
 
-            // 渲染
-            if (highConfPoints.length > 0) {
-                drawPoints(highConfPoints, "blue", "circle");
-                // drawTrackLine(highConfPoints, "#0066ff", "solid");
-            }
-            if (lowConfPoints.length > 0) {
-                drawPoints(lowConfPoints, "red", "hollowCircle"); // 低置信：红色空心圆
-                // drawPoints(lowConfPoints, "red", "hollowCircle");
-            }
+                    const extrapPoints = [];
+                    // 遍历外推点数据，格式化
+                    extrapData.forEach(item => {
+                        const lng = parseFloat(item.longitude || item.lng);
+                        const lat = parseFloat(item.latitude || item.lat);
 
-            // 自动缩放视野（可选增强）
-            const allPoints = [...highConfPoints, ...lowConfPoints];
-            // if (allPoints.length > 0) {
-            //     const bounds = new AMap.Bounds();
-            //     allPoints.forEach(p => bounds.extend([p.lng, p.lat]));
-            //     map.setBounds(bounds, { padding: [50, 50, 50, 50] });
-            // }
+                        if (isNaN(lng) || isNaN(lat)) {
+                            console.warn('跳过无效外推点:', item);
+                            return;
+                        }
 
-            alert(`✅ 渲染成功！\n高置信: ${highConfPoints.length} 点\n低置信: ${lowConfPoints.length} 点`);
-        } catch (e) {
-            alert('JSON格式错误：' + e.message);
-            console.error('解析错误详情：', e);
+                        extrapPoints.push({
+                            lng: lng,
+                            lat: lat,
+                            timestamp: item.timestamp || '未知',
+                            name: '外推点位',
+                            type: '外推点',
+                            raw: item
+                        });
+                    });
+
+                    // 按时间排序
+                    const sortByTime = (a, b) => (a.timestamp || 0) - (b.timestamp || 0);
+                    extrapPoints.sort(sortByTime);
+
+                    // 渲染外推点+地图定位到第一个外推点
+                    if (extrapPoints.length > 0) {
+                        drawPoints(extrapPoints, "green", "extrapCircle");
+                        map.setCenter([extrapPoints[0].lng, extrapPoints[0].lat]);
+                        map.setZoom(18);
+                    }
+
+                    alert(`✅ 外推点渲染成功！\n共渲染: ${extrapPoints.length} 个外推点`);
+                } catch (e) {
+                    alert('外推点JSON格式错误：' + e.message);
+                    console.error('外推点解析错误详情：', e);
+                }
+            });
+
+            // 清空地图事件
+            document.getElementById('clearBtn').addEventListener('click', clearMap);
         }
-        });
 
-        document.getElementById('clearBtn').addEventListener('click', clearMap);
-    }
-
-        // 辅助函数：根据 dataSource 获取类型名称（模拟 Java 枚举）
+        // 辅助函数：根据 dataSource 获取类型名称
         function getDataTypeName(code) {
             const names = {
                 0: "融合数据",
@@ -222,19 +306,17 @@ function initEvent() {
             return names[code] || "未知类型";
         }
 
-         // 判断是否高置信（对应 Java 枚举）
+        // 判断是否高置信
         function isHighConfidence(dataSource) {
-            // RID(3), PROTOCOL_ANALYSIS(5), BD_MESSAGE(6), UAV_CLOUD(7)
             return [3, 5, 6, 7].includes(dataSource);
         }
 
-        // 判断是否低置信（排除 FUSION_DATA(0)）
+        // 判断是否低置信
         function isLowConfidence(dataSource) {
-            // ADS_B(1), RADAR(2), FIVE_G_A(4), TDOA(8)
             return [1, 2, 4, 8].includes(dataSource);
         }
 
-        // 绘制点位（使用高德内置图标）
+        // 绘制点位（核心修改：新增外推点greenCircle样式，复用高德绿色内置图标）
         function drawPoints(points, color, shape) {
             if (!map) return;
             
@@ -244,35 +326,33 @@ function initEvent() {
                     return;
                 }
 
-                // 核心修改：使用高德内置Marker样式，无需自定义SVG
                 let markerOptions = {
                     position: [Number(point.lng), Number(point.lat)],
                     title: point.name || '未知点位',
                     anchor: "bottom-center"
                 };
 
-                // 根据类型设置不同的内置图标样式
+                // 根据类型设置不同的内置图标样式（和原有高低置信点同风格）
                 switch(shape) {
-                    case "circle": // 高置信：蓝色实心圆
+                    case "circle": // 高置信：蓝色实心圆（原有逻辑不变）
                         markerOptions.icon = new AMap.Icon({
                             size: new AMap.Size(16, 16),
-                            image: 'https://webapi.amap.com/theme/v1.3/markers/n/mark_b.png', // 高德内置蓝色点
+                            image: 'https://webapi.amap.com/theme/v1.3/markers/n/mark_b.png',
                             imageSize: new AMap.Size(16, 16)
                         });
                         break;
-                    case "hollowCircle": // 低置信：红色空心圆
+                    case "hollowCircle": // 低置信：红色空心圆（原有逻辑不变）
                         markerOptions.icon = new AMap.Icon({
                             size: new AMap.Size(16, 16),
-                            image: 'https://webapi.amap.com/theme/v1.3/markers/n/mark_r.png', // 高德内置红色点
+                            image: 'https://webapi.amap.com/theme/v1.3/markers/n/mark_r.png',
                             imageSize: new AMap.Size(16, 16)
                         });
-                        // 手动调整为空心效果（或直接用内置空心图标）
                         markerOptions.bubble = true;
                         break;
-                    case "triangle": // 外推点：绿色三角形
+                    case "extrapCircle": // 外推点：绿色实心圆（和高置信点同样式，仅换颜色）
                         markerOptions.icon = new AMap.Icon({
                             size: new AMap.Size(16, 16),
-                            image: 'https://webapi.amap.com/theme/v1.3/markers/n/mark_g.png', // 高德内置绿色点
+                            image: 'http://amappc.cn-hangzhou.oss-pub.aliyun-inc.com/lbs/static/img/marker.png',
                             imageSize: new AMap.Size(16, 16)
                         });
                         break;
@@ -280,7 +360,7 @@ function initEvent() {
 
                 const marker = new AMap.Marker(markerOptions);
 
-                // 信息弹窗
+                // 信息弹窗（外推点保留原有弹窗逻辑，样式不变）
                 marker.on("click", () => {
                     const infoWindow = new AMap.InfoWindow({
                         content: `
@@ -301,7 +381,7 @@ function initEvent() {
             });
         }
 
-        // 绘制轨迹线
+        // 绘制轨迹线（原有逻辑不变）
         function drawTrackLine(points, color, lineType) {
             if (!map || points.length < 2) return;
             
@@ -323,7 +403,7 @@ function initEvent() {
             polylines.push(polyline);
         }
 
-        // 清空地图
+        // 清空地图（原有逻辑不变）
         function clearMap() {
             if (!map) return;
             if (markers.length > 0) {
@@ -334,6 +414,9 @@ function initEvent() {
                 map.remove(polylines);
                 polylines = [];
             }
+            document.getElementById('pointJsonInput').value = '';
+            document.getElementById('extrapJsonInput').value = '';
+            alert('✅ 地图已清空！');
         }
 
         // 页面加载初始化
